@@ -1,8 +1,8 @@
-// tailwind.config.js
-module.exports = {
-  // CRITICAL: Tells Tailwind where to find the utility classes (in your src folder)
+/** @type {import('tailwindcss').Config} */
+export default {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {},
