@@ -1,13 +1,38 @@
+/* C:\Users\Dell\agro-plasti-guard\src\index.css */
+
+/* Inject Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* The rest of the default file content is removed 
+  to ensure no conflicting styles prevent Tailwind from loading.
+*/
+
+/* Optional: Re-adding a basic body/font style, 
+  as the removal of the default style might affect unstyled elements.
+*/
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  /* Use a generic font stack for better compatibility */
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Print-Friendly Fix (from your requirements) */
+@media print {
+  /* Forces backgrounds to white for printing (saves ink) */
+  .bg-gradient-to-br {
+    background: none !important;
+    background-color: white !important;
+  }
+  /* Ensures white text on gradients becomes readable black text */
+  .text-white {
+    color: black !important;
+  }
+  /* Removes heavy shadows in print */
+  .shadow-2xl, .shadow-xl {
+    box-shadow: none !important;
+  }
 }

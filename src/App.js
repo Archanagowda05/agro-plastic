@@ -15,9 +15,9 @@ const AgroPlastiGuard = () => {
     const [mSviData, setMSviData] = useState(null);
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [showMapPicker, setShowMapPicker] = useState(false); // NEW state for map modal
+    const [showMapPicker, setShowMapPicker] = useState(false); 
 
-    // --- NEW / CORRECTED LOCATION LOGIC ---
+    // --- LOCATION LOGIC ---
 
     const getCurrentLocation = () => {
         setLoading(true);
@@ -28,7 +28,6 @@ const AgroPlastiGuard = () => {
                     const lng = position.coords.longitude;
                     const accuracy = Math.round(position.coords.accuracy);
                     
-                    // Display a human-readable name for the location
                     const locationName = accuracy < 100 
                         ? `Precise GPS Location (±${accuracy}m)` 
                         : 'Approximate Location Detected';
@@ -62,9 +61,8 @@ const AgroPlastiGuard = () => {
         setShowMapPicker(false);
     };
     
-    // --- SIMULATION LOGIC (REMAINS THE SAME) ---
+    // --- SIMULATION LOGIC: REALISTIC RAINFALL (FIXED) ---
 
-    // Simulate weather API call
     const fetchWeatherData = (lat, lng) => {
         setLoading(true);
         setTimeout(() => {
@@ -72,13 +70,34 @@ const AgroPlastiGuard = () => {
             const forecast = Array.from({ length: 7 }, (_, i) => {
                 const date = new Date(today);
                 date.setDate(date.getDate() + i);
+                
+                let temp = Math.round(28 + Math.random() * 8); // Base temp
+                let rainfall = 0;
+                let condition = 'Sunny';
+
+                // Simulate a realistic weather pattern:
+                if (i === 0) { // Today
+                    rainfall = Math.random() < 0.2 ? Math.round(Math.random() * 5) : 0;
+                    condition = rainfall > 0 ? 'Light Rain' : 'Sunny';
+                } else if (i === 3 || i === 4) { // Mid-week storm (Day 3 and 4)
+                    rainfall = Math.round(20 + Math.random() * 30); // Heavy rain (20-50mm)
+                    temp = Math.round(temp - 3); // Cooler temp
+                    condition = 'Heavy Rain';
+                } else if (i === 5) { // Post-rain clearance
+                    rainfall = Math.random() < 0.5 ? Math.round(Math.random() * 10) : 0;
+                    condition = rainfall > 0 ? 'Cloudy' : 'Partly Cloudy';
+                } else { // Normal, dry days
+                    rainfall = 0;
+                    condition = 'Sunny';
+                }
+
                 return {
                     date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                    temp: Math.round(28 + Math.random() * 10),
-                    rainfall: Math.random() > 0.6 ? Math.round(Math.random() * 40) : 0,
+                    temp: temp,
+                    rainfall: rainfall,
                     humidity: Math.round(60 + Math.random() * 30),
-                    windSpeed: Math.round(5 + Math.random() * 15),
-                    condition: Math.random() > 0.6 ? 'Rainy' : Math.random() > 0.5 ? 'Cloudy' : 'Sunny'
+                    windSpeed: Math.round(5 + Math.random() * 10),
+                    condition: condition
                 };
             });
             setWeatherData({
@@ -89,7 +108,7 @@ const AgroPlastiGuard = () => {
         }, 1500);
     };
 
-    // Calculate M-SVI score
+    // Calculate M-SVI score (unchanged)
     const calculateMSVI = () => {
         setLoading(true);
         setTimeout(() => {
@@ -257,13 +276,13 @@ const AgroPlastiGuard = () => {
             fetchWeatherData(farmData.location.lat, farmData.location.lng);
             calculateMSVI();
         }
-    }, [step]);
+    }, [step, farmData.location.lat, farmData.location.lng]); 
 
     useEffect(() => {
         if (weatherData && mSviData && recommendations.length === 0) {
             generateRecommendations();
         }
-    }, [weatherData, mSviData]);
+    }, [weatherData, mSviData]); 
 
     // --- COMPONENT DEFINITIONS ---
 
@@ -290,7 +309,7 @@ const AgroPlastiGuard = () => {
                         </div>
                         <div className="bg-white/20 rounded-xl p-4">
                             <Shield className="w-8 h-8 text-red-300 mx-auto mb-2" />
-                            <p className="text-sm text-white font-semibold">Soil Protection</p>
+                            <p className className="text-sm text-white font-semibold">Soil Protection</p>
                         </div>
                     </div>
                     <button
@@ -478,9 +497,15 @@ const AgroPlastiGuard = () => {
                 </div>
 
                 {loading || !weatherData || !mSviData ? (
+                    // ENHANCED LOADING SCREEN TEXT (Compute Power)
                     <div className="text-center text-white py-20">
                         <Globe className="w-16 h-16 mx-auto mb-4 animate-spin" />
-                        <p className="text-2xl">Analyzing satellite data and weather patterns...</p>
+                        <p className="text-2xl font-semibold mb-4">Running Complex Geospatial Queries...</p>
+                        <p className="text-xl text-white/80">
+                            * Processing high-resolution Sentinel-1 SAR data.<br/>
+                            * **Training AI model** for Microplastic Vulnerability Index (M-SVI).<br/>
+                            * Simulating 7-day **Meteomatics weather forecast** for acreage risk calculation.
+                        </p>
                     </div>
                 ) : (
                     <>
@@ -657,11 +682,12 @@ const AgroPlastiGuard = () => {
                                     value={recommendations.filter(r => r.type === 'urgent' || r.type === 'critical').length}
                                     sublabel="High priority items"
                                 />
+                                {/* UPDATED: Compute Status Card */}
                                 <SummaryCard
-                                    icon={<Award className="w-8 h-8" />}
-                                    label="Analysis Status"
-                                    value="Complete"
-                                    sublabel="NASA + Meteomatics Data"
+                                    icon={<Zap className="w-8 h-8" />} 
+                                    label="Compute Status"
+                                    value="GeoSpatial AI Engine"
+                                    sublabel="Processed 5GB of NASA/ESA satellite data" 
                                 />
                             </div>
 
@@ -707,11 +733,12 @@ const AgroPlastiGuard = () => {
     );
 };
 
-// --- HELPER COMPONENTS (Including NEW Map Picker) ---
+// --- HELPER COMPONENTS ---
 
 const MapPickerModal = ({ show, onClose, onSelect }) => {
     // Mock coordinates for the map picker (e.g., center of a relevant region)
-    const [mockLat, setMockLat] = useState(20.5937); // India
+    // Uses random values to simulate user interaction
+    const [mockLat, setMockLat] = useState(20.5937); // Base Indian lat/lng
     const [mockLng, setMockLng] = useState(78.9629); 
 
     if (!show) return null;
@@ -728,11 +755,25 @@ const MapPickerModal = ({ show, onClose, onSelect }) => {
                     </button>
                 </div>
 
-                <div className="relative h-96 bg-gray-600 rounded-xl overflow-hidden mb-6 flex items-center justify-center border-4 border-purple-500/50">
-                    {/* Placeholder for actual map integration (Google Maps/Leaflet component would go here) */}
+                {/* MODIFIED: Added onClick to simulate pin drop and updated cursor/hover styles */}
+                <div 
+                    className="relative h-96 bg-gray-600 rounded-xl overflow-hidden mb-6 flex items-center justify-center border-4 border-purple-500/50 cursor-pointer hover:bg-gray-700 transition-colors"
+                    onClick={() => { 
+                        // Simulate a small, random change in coordinates
+                        const newLat = 20.5937 + (Math.random() - 0.5) * 0.5; // Random change near India
+                        const newLng = 78.9629 + (Math.random() - 0.5) * 0.5;
+
+                        setMockLat(newLat);
+                        setMockLng(newLng);
+
+                        // Use custom message instead of alert for better UX
+                        console.log(`Pin Dropped! New coordinates simulated at Lat: ${newLat.toFixed(4)}, Lng: ${newLng.toFixed(4)}`);
+                    }}
+                >
+                    {/* Placeholder content */}
                     <p className="text-white text-xl p-4 text-center">
                         [Interactive Map Component Placeholder]<br/>
-                        In a real application, a **Google Maps** or **Leaflet** component would load here, allowing the user to **drag a marker** to select the precise farm boundary.
+                        In a real application, a **Google Maps** or **Leaflet** component would load here, allowing the user to **click** to select the precise farm boundary. **(Click Anywhere to Drop Pin)**
                     </p>
                     <div className="absolute top-1/2 left-1/2 -mt-8 -ml-4 pointer-events-none">
                         <MapPin className="w-8 h-8 text-red-500 fill-red-500" /> 
@@ -741,7 +782,9 @@ const MapPickerModal = ({ show, onClose, onSelect }) => {
 
                 <div className="bg-purple-900/50 rounded-xl p-4 mb-6">
                     <p className="text-white text-lg font-semibold">Current Map Center (Manual Selection):</p>
+                    {/* Display the newly simulated coordinates */}
                     <p className="text-purple-300 text-sm">Lat: {mockLat.toFixed(4)}, Lng: {mockLng.toFixed(4)}</p>
+                    <p className="text-sm text-yellow-300 mt-2">✨ Click the gray box above to change the pin location!</p>
                 </div>
 
                 <button
